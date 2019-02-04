@@ -1,0 +1,8 @@
+*.*.sw?
+*.bak
+*.hex
+*.pdsbak
+.ssh
+Billd
+*.asm
+*.bin
