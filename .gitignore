@@ -1,8 +1,14 @@
 *.*.sw?
 *.bak
 *.hex
+*.bin
+*.zip
+*.rar
 *.pdsbak
 .ssh
 Billd
-*.asm
-*.bin
+.project
+.pydevproject
+virtualenv/
+__pycache__
+*.pyc
