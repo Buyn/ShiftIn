@@ -17,6 +17,8 @@
  * them 4 at a time into separate unsigned long variables).
  * 
 *//*}}}*/
+
+#include "pinsRedefine.h"
 //define block{{{
 /* How many shift register chips are daisy-chained.
 */
