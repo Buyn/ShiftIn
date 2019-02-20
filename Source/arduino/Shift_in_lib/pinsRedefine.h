@@ -12,9 +12,9 @@
 /*}}}*/
 //define bloc  {{{
 // Pins form shiftin.h
-#define SHIFTIN_PLOADPIN        = 8;  // 1 sh\ld Connects to Parallel load pin 
-#define SHIFTIN_CLOCKENABLEPIN  = 9;  // clk inh Connects to Clock Enable pin 
-#define SHIFTIN_DATAPIN         = 11; // Qh serial output Connects to the Q7 pin 
-#define SHIFTIN_CLOCKPIN        = 12; // clk Connects to the Clock pin 
+#define SHIFTIN_PLOADPIN         8  // 1 sh\ld Connects to Parallel load pin 
+#define SHIFTIN_CLOCKENABLEPIN   9  // clk inh Connects to Clock Enable pin 
+#define SHIFTIN_DATAPIN          11 // Qh serial output Connects to the Q7 pin 
+#define SHIFTIN_CLOCKPIN         12 // clk Connects to the Clock pin 
 /*}}}*/
 #endif

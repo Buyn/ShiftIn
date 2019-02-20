@@ -1,96 +1,95 @@
 #include "ShiftIn.h"
 
-/*   LED::LED   * {{{ */
-LED::LED(int _pin) {
-	pin = _pin;
-	to_value = 0;
-	value = 0;
-	fade_speed = 10;
-	update_time = millis() + fade_speed;
-	pinMode(pin, OUTPUT);
-	} //}}}
-/*   LED::LED   * {{{ */
-LED::LED() {
-	pin = 0;
-	to_value = 0;
-	value = 0;
-	fade_speed = 10;
-	update_time = millis() + fade_speed;
+/*   ShiftIn::ShiftIn   * {{{ */
+ShiftIn::ShiftIn(void) {
+	update_time = millis() + POLL_DELAY_MSEC;
 	} //}}}
 
-/*   LED::set_speed   * {{{ */
-void LED::set_speed(int new_speed){
-	fade_speed = new_speed;
+/*   ShiftIn::initpins   * {{{ */
+void ShiftIn::initpins(void){
+   pinMode(SHIFTIN_PLOADPIN, OUTPUT);
+   pinMode(SHIFTIN_CLOCKENABLEPIN, OUTPUT);
+   pinMode(SHIFTIN_CLOCKPIN, OUTPUT);
+   pinMode(SHIFTIN_DATAPIN, INPUT);
+   digitalWrite(SHIFTIN_CLOCKPIN, LOW);
+   digitalWrite(SHIFTIN_PLOADPIN, HIGH);
+	} //}}}
+/*   ShiftIn::update   * {{{ */
+void ShiftIn::update(void){
+   /* Read the state of all zones.  */
+   read_shift_regs();
+   /* If there was a chage in state, display which ones changed.  */
+   if(bytesVal != oldPinValues) {
+      changed = true;
+      oldPinValues = bytesVal;
+		}
 	} //}}}
 
-/*   LED::fade_to   * {{{ */
-void LED::fade_to(int new_value){
-	to_value = new_value;
+/*   ShiftIn::isChenged   * {{{ */
+bool ShiftIn::isChenged(void){
+	if(changed){
+		changed = false;
+		return  true;
+		}
+	return false;
 	} //}}}
 
-/*   LED::set_to   * {{{ */
-void LED::set_to(int new_value){
-	to_value = new_value;
-	value = new_value;
-	set_on();
-	} //}}}
+/* display_pin_values {{{
+Dump the list of zones along with their current status.
+*/
+void ShiftIn::display_pin_values()
+{
+    Serial.print("Pin States:\r\n");
 
-/*   LED::set_on   * {{{ */
-void LED::set_on(void){
-	analogWrite(pin, to_value);
-	} //}}}
+    for(int i = 0; i < DATA_WIDTH; i++)
+    {
+        Serial.print("  Pin-");
+        Serial.print(i);
+        Serial.print(": ");
 
-/*   LED::update   * {{{ */
-void LED::update(void){
-	if ( value > to_value) fade_Down();
-	if ( value < to_value) fade_Up();
-	} //}}}
+        if((bytesVal >> i) & 1)
+            Serial.print("HIGH");
+        else
+            Serial.print("LOW");
 
-/*   LED::runtime   * {{{ */
-void LED::runtime(void){
+        Serial.print("\r\n");
+    }
+
+    Serial.print("\r\n");
+}/*}}}*/
+
+/*   ShiftIn::runtime   * {{{ */
+void ShiftIn::runtime(void){
 	if (millis() < update_time) return;
-	if ( value != to_value ) update();
-	update_time = millis() + fade_speed;
-	} //}}}
-/*   LED::done   * {{{ */
-bool LED::done(void){
-	if ( value == to_value ) return true;
-	else return false;
+	update();
+	update_time = millis() + POLL_DELAY_MSEC;
 	} //}}}
 
-/*   LED::fade_Up   * {{{ */
-void LED::fade_Up(void){
-	if ( value == LED_MAX_VALUE) return;
-	analogWrite(pin, value++);
-	//value++;
-	} //}}}
-
-/*   LED::fade_Down   * {{{ */
-void LED::fade_Down(void){
-	if ( value == 0) return;
-	analogWrite(pin, value--);
-	//to_value--;
-	} //}}}
-
-/*   LED::on   * {{{ */
-void LED::on(void) {
-	digitalWrite(pin, HIGH);
-	} //}}}
-/*   LED::off   * {{{ */
-void LED::off(void) {
-	digitalWrite(pin, LOW);
-	} //}}}
-/*   LED::trige   {{{ */
-void LED::trige(void) {
-	if (value == 0) {
-		on();
-		value = 1;
-		}
-	else{
-		off();
-		value = 0;
-		}
-	} //}}}
-
+/* ShiftIn::read_shift_regs   {{{
+This function is essentially a "shift-in" routine reading the
+ * serial Data from the shift register chips and representing
+ * the state of those pins in an unsigned integer (or long).
+*/
+void ShiftIn::read_shift_regs(void) {
+   /* Trigger a parallel Load to latch the state of the data lines, */
+   digitalWrite(SHIFTIN_CLOCKENABLEPIN, HIGH);
+   digitalWrite(SHIFTIN_PLOADPIN, LOW);
+   delayMicroseconds(PULSE_WIDTH_USEC);
+	bytesVal = 0;
+   bitVal 	= 0;
+   digitalWrite(SHIFTIN_PLOADPIN, HIGH);
+   digitalWrite(SHIFTIN_CLOCKENABLEPIN, LOW);
+   /* Loop to read each bit value from the serial out line {{{
+    * of the SN74HC165N.  */
+   for(int i = 0; i < DATA_WIDTH; i++) {
+      bitVal = digitalRead(SHIFTIN_DATAPIN);
+      /* Pulse the Clock (rising edge shifts the next bit).  */
+      digitalWrite(SHIFTIN_CLOCKPIN, HIGH);
+      /* Set the corresponding bit in bytesVal.  */
+      bytesVal |= (bitVal << ((DATA_WIDTH-1) - i));
+      //delayMicroseconds(PULSE_WIDTH_USEC);
+      digitalWrite(SHIFTIN_CLOCKPIN, LOW);
+	   }/*}}}*/
+	}/*}}}*/
 
 

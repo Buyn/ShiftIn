@@ -32,56 +32,43 @@
 #endif
 /*}}}*/
 //define bloc  {{{
-/* How many shift register chips are daisy-chained.
-*/
+/* How many shift register chips are daisy-chained.  */
 #define NUMBER_OF_SHIFT_CHIPS   2
-
-/* Width of data (how many ext lines).
-*/
+/* Width of data (how many ext lines).  */
 #define DATA_WIDTH   NUMBER_OF_SHIFT_CHIPS * 8
-
-/* Width of pulse to trigger the shift register to read and latch.
-*/
-#define PULSE_WIDTH_USEC   5
-
-/* Optional delay between shift register reads.
-*/
-#define POLL_DELAY_MSEC   1
-
+/* Width of pulse to trigger the shift register to read and latch.  */
+#define PULSE_WIDTH_USEC   1
+/* Optional delay between shift register reads.  */
+#define POLL_DELAY_MSEC   100
 /* You will need to change the "int" to "long" If the
- * NUMBER_OF_SHIFT_CHIPS is higher than 2.
-*/
+ * NUMBER_OF_SHIFT_CHIPS is higher than 2.  */
 #define BYTES_VAL_T unsigned int
 //Pins 
-#define SHIFTIN_PLOADPIN        = 8;  // 1 sh\ld Connects to Parallel load pin 
-#define SHIFTIN_CLOCKENABLEPIN  = 9;  // clk inh Connects to Clock Enable pin 
-#define SHIFTIN_DATAPIN         = 11; // Qh serial output Connects to the Q7 pin 
-#define SHIFTIN_CLOCKPIN        = 12; // clk Connects to the Clock pin 
+#define SHIFTIN_PLOADPIN         8  // 1 sh\ld Connects to Parallel load pin 
+#define SHIFTIN_CLOCKENABLEPIN   9  // clk inh Connects to Clock Enable pin 
+#define SHIFTIN_DATAPIN          11 // Qh serial output Connects to the Q7 pin 
+#define SHIFTIN_CLOCKPIN         12 // clk Connects to the Clock pin 
 
 /*}}}*/
 // ShiftIn calss{{{
 class ShiftIn {
  public: // {{{
-	ShiftIn(int, int, int, int);
 	ShiftIn();
-	void set_speed(int);
-	void fade_to(int);
-	void set_to(int);
-	void update(void );
-	void runtime(void );
-	bool done(void);
-	void on(void );
-	void off(void );
-	void trige(void );
-	unsigned long update_time;
-	int pin;
+	BYTES_VAL_T oldPinValues;
+	bool changed;
+	void display_pin_values();
+	void runtime(void);
+	bool isChenged(void);
+	void initpins(void);
 	/*}}}*/
  private:/*{{{*/
-	unsigned int value, to_value;
-	unsigned long fade_speed;
-	void fade_Up(void); 
-	void fade_Down(void); 
-	void set_on(void); 
+	//bool pause;
+	long update_time;
+	long bitVal;
+	BYTES_VAL_T bytesVal;
+	//BYTES_VAL_T pinValues;
+	void update(void);
+	void read_shift_regs();
 	/*}}}*/
  };
  /*}}}*/
